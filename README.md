@@ -17,7 +17,7 @@ Proyecto Maven Web (Servlets + JavaBeans + JPA/EclipseLink), desplegado en Tomca
    ```sql
    CREATE DATABASE proyectoweb_db;
    ```
-   Las credenciales por defecto en `src/main/resources/META-INF/persistence.xml` son las de XAMPP (`root`, sin contraseña). Si tu MySQL usa otro usuario/contraseña, ajústalo ahí.
+   Si tu MySQL usa otro usuario/contraseña, ajústalo ahí.
 
 3. **Define la variable de entorno `CATALINA_HOME`** apuntando a tu instalación de Tomcat:
 
