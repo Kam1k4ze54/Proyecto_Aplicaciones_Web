@@ -16,17 +16,13 @@
                 <div class="brand-name">Quito Descubre</div>
             </div>
             <nav class="sidebar-nav">
-                <a href="${pageContext.request.contextPath}/PanelUsuarioController?ruta=inicio"><span class="nav-icon">⌂</span>Inicio</a>
-                <a href="#"><span class="nav-icon">◆</span>Lugares turísticos</a>
-                <a href="#"><span class="nav-icon">◆</span>Gastronomía</a>
-                <a href="#"><span class="nav-icon">◆</span>Eventos</a>
-                <a href="#"><span class="nav-icon">♡</span>Favoritos</a>
+                <a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=inicio"><span class="nav-icon">⌂</span>Inicio</a>
+                <a href="${pageContext.request.contextPath}/GestionarFavoritosController"><span class="nav-icon">♡</span>Favoritos</a>
             </nav>
         </aside>
 
         <div class="main-area">
             <header class="topbar">
-                <input type="text" class="search-input" placeholder="Buscar lugares, eventos, gastronomía…" />
                 <div class="user-menu">
                     <button class="user-trigger">
                         <div class="avatar-mini">${usuario.nombres.substring(0,1)}${usuario.apellidos.substring(0,1)}</div>
@@ -35,9 +31,9 @@
                     </button>
                     <div class="user-dropdown">
                         <a href="${pageContext.request.contextPath}/GestionarPerfilController?ruta=gestionarPerfil">Mi perfil</a>
-                        <a href="#">Favoritos</a>
+                        <a href="${pageContext.request.contextPath}/GestionarFavoritosController">Favoritos</a>
                         <hr />
-                        <a href="${pageContext.request.contextPath}/IniciarSesionController?ruta=iniciarSesion">Cerrar sesión</a>
+                        <a href="${pageContext.request.contextPath}/IniciarSesionController?ruta=cerrarSesion">Cerrar sesión</a>
                     </div>
                 </div>
             </header>

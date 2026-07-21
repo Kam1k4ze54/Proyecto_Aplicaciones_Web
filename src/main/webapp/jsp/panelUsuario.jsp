@@ -1,12 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8"><title>Quito Descubre</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Piazzolla:wght@500;600;700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilo.css?v=2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilo.css?v=3">
 </head>
 <body>
     <div class="app-shell">
@@ -16,17 +17,18 @@
                 <div class="brand-name">Quito Descubre</div>
             </div>
             <nav class="sidebar-nav">
-                <a href="${pageContext.request.contextPath}/PanelUsuarioController?ruta=inicio" class="active"><span class="nav-icon">⌂</span>Inicio</a>
-                <a href="#"><span class="nav-icon">◆</span>Lugares turísticos</a>
-                <a href="#"><span class="nav-icon">◆</span>Gastronomía</a>
-                <a href="#"><span class="nav-icon">◆</span>Eventos</a>
-                <a href="#"><span class="nav-icon">♡</span>Favoritos</a>
+                <a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=inicio" class="active"><span class="nav-icon">⌂</span>Inicio</a>
+                <a href="#seccion-LugarTuristico"><span class="nav-icon">◆</span>Lugares turísticos</a>
+                <a href="#seccion-EstablecimientoGastronomico"><span class="nav-icon">◆</span>Gastronomía</a>
+                <a href="#seccion-Evento"><span class="nav-icon">◆</span>Eventos</a>
+                <a href="${pageContext.request.contextPath}/GestionarFavoritosController"><span class="nav-icon">♡</span>Favoritos</a>
             </nav>
         </aside>
 
         <div class="main-area">
             <header class="topbar">
-                <input type="text" class="search-input" placeholder="Buscar lugares, eventos, gastronomía…" />
+                <%-- CU04 alterno 5: barra de búsqueda global (AJAX) --%>
+                <input type="text" id="busquedaInput" class="search-input" placeholder="Buscar lugares, eventos, gastronomía…" autocomplete="off" />
                 <div class="user-menu">
                     <button class="user-trigger">
                         <div class="avatar-mini">${usuario.nombres.substring(0,1)}${usuario.apellidos.substring(0,1)}</div>
@@ -35,9 +37,9 @@
                     </button>
                     <div class="user-dropdown">
                         <a href="${pageContext.request.contextPath}/GestionarPerfilController?ruta=gestionarPerfil">Mi perfil</a>
-                        <a href="#">Favoritos</a>
+                        <a href="${pageContext.request.contextPath}/GestionarFavoritosController">Favoritos</a>
                         <hr />
-                        <a href="${pageContext.request.contextPath}/IniciarSesionController?ruta=iniciarSesion">Cerrar sesión</a>
+                        <a href="${pageContext.request.contextPath}/IniciarSesionController?ruta=cerrarSesion">Cerrar sesión</a>
                     </div>
                 </div>
             </header>
@@ -47,137 +49,81 @@
                     <c:if test="${not empty mensajeExito}">
                         <div class="alert alert-success">${mensajeExito}</div>
                     </c:if>
+                    <div id="avisoFavoritos" class="alert" style="display:none;"></div>
 
-                    <div class="hero">
-                        <div class="hero-inner">
-                            <div class="hero-eyebrow">Tu ciudad, redescubierta</div>
-                            <h1>Descubre lo mejor de Quito</h1>
-                            <p>Lugares increíbles, sabores únicos y eventos que te conectan con nuestra cultura.</p>
-                            <a href="#" class="btn btn-primary">Explorar ahora →</a>
+                    <%-- Resultados de búsqueda (los llena panelUsuario.js) --%>
+                    <div id="resultadosBusqueda" style="display:none;"></div>
+
+                    <div id="seccionesPanel">
+                        <div class="hero">
+                            <div class="hero-inner">
+                                <div class="hero-eyebrow">Tu ciudad, redescubierta</div>
+                                <h1>Descubre lo mejor de Quito</h1>
+                                <p>Lugares increíbles, sabores únicos y eventos que te conectan con nuestra cultura.</p>
+                                <a href="#seccion-LugarTuristico" class="btn btn-primary">Explorar ahora →</a>
+                            </div>
                         </div>
+
+                        <%-- CU04-A paso 2: 3 elementos por sección según preferencias
+                             (o destacados como alternativa — alterno 7) --%>
+                        <c:forEach var="seccion" items="${vistaPrevia}">
+                            <section id="seccion-${seccion.key}">
+                                <div class="section-title">
+                                    <h2>
+                                        <c:choose>
+                                            <c:when test="${seccion.key == 'LugarTuristico'}">Lugares turísticos</c:when>
+                                            <c:when test="${seccion.key == 'EstablecimientoGastronomico'}">Establecimientos gastronómicos</c:when>
+                                            <c:otherwise>Eventos</c:otherwise>
+                                        </c:choose>
+                                        <c:if test="${seccion.value.origen == 'preferencias'}">
+                                            <span class="seccion-origen">Sugerido para ti</span>
+                                        </c:if>
+                                        <c:if test="${seccion.value.origen == 'destacados'}">
+                                            <span class="seccion-origen">Destacados</span>
+                                        </c:if>
+                                    </h2>
+                                    <c:if test="${seccion.value.origen != 'vacio'}">
+                                        <a href="#" class="link-all btn-ver-mas" data-tipo="${seccion.key}">Ver más →</a>
+                                    </c:if>
+                                </div>
+
+                                <c:choose>
+                                    <c:when test="${seccion.value.origen == 'vacio'}">
+                                        <%-- Alterno 7.3: ni recomendaciones ni destacados --%>
+                                        <p>Aún no hay contenido disponible en esta sección.</p>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="row-grid cols-3" id="grid-${seccion.key}">
+                                            <c:forEach var="e" items="${seccion.value.elementos}">
+                                                <div class="card">
+                                                    <a class="card-link" href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=detalle&id=${e.id}">
+                                                        <div class="card-thumb ${e.tipo == 'LugarTuristico' ? 'ph-lugar' : e.tipo == 'EstablecimientoGastronomico' ? 'ph-gastro' : 'ph-evento'}">
+                                                            <c:if test="${e.destacado}"><span class="tag">Destacado</span></c:if>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <h3>${e.nombre}</h3>
+                                                            <div class="card-meta">
+                                                                <span class="rating">★ <fmt:formatNumber value="${e.calificacionPromedio}" maxFractionDigits="1" minFractionDigits="1"/></span>
+                                                                <span class="dot">·</span><span>${e.sector}</span>
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                    <c:if test="${e.tipo != 'Evento'}">
+                                                        <button class="card-fav" data-id="${e.id}" data-tipo="${e.tipo}" title="Agregar a favoritos">♡</button>
+                                                    </c:if>
+                                                </div>
+                                            </c:forEach>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
+                            </section>
+                        </c:forEach>
                     </div>
-
-                    <section>
-                        <div class="section-title">
-                            <h2>Destacados para ti</h2>
-                            <a href="#" class="link-all">Ver todos →</a>
-                        </div>
-                        <div class="row-grid cols-3">
-                            <div class="card">
-                                <div class="card-thumb ph-lugar">
-                                    <span class="tag">Lugar destacado</span>
-                                    <button class="card-fav">♡</button>
-                                </div>
-                                <div class="card-body">
-                                    <h3>Mitad del Mundo</h3>
-                                    <div class="card-meta"><span class="rating">★ 4.8</span><span class="dot">·</span><span>San Antonio</span></div>
-                                </div>
-                            </div>
-                            <div class="card">
-                                <div class="card-thumb ph-gastro">
-                                    <span class="tag">Gastronomía</span>
-                                    <button class="card-fav">♡</button>
-                                </div>
-                                <div class="card-body">
-                                    <h3>Hornado Quiteño</h3>
-                                    <div class="card-meta"><span class="rating">★ 4.7</span><span class="dot">·</span><span>Comida típica</span></div>
-                                </div>
-                            </div>
-                            <div class="card">
-                                <div class="card-thumb ph-evento">
-                                    <span class="tag">Evento</span>
-                                    <button class="card-fav">♡</button>
-                                </div>
-                                <div class="card-body">
-                                    <h3>Fiesta de la Virgen del Quinche</h3>
-                                    <div class="card-meta"><span class="rating">★ 4.9</span><span class="dot">·</span><span>Julio</span></div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section>
-                        <div class="row-grid cols-2">
-                            <div>
-                                <div class="section-title">
-                                    <h2>Lugares turísticos</h2>
-                                    <a href="#" class="link-all">Ver más →</a>
-                                </div>
-                                <div class="row-grid cols-2">
-                                    <div class="card">
-                                        <div class="card-thumb ph-lugar"><button class="card-fav">♡</button></div>
-                                        <div class="card-body">
-                                            <h3>Centro Histórico</h3>
-                                            <div class="card-meta"><span class="rating">★ 4.8</span><span class="dot">·</span><span>Centro</span></div>
-                                        </div>
-                                    </div>
-                                    <div class="card">
-                                        <div class="card-thumb ph-lugar"><button class="card-fav">♡</button></div>
-                                        <div class="card-body">
-                                            <h3>Teleférico de Quito</h3>
-                                            <div class="card-meta"><span class="rating">★ 4.7</span><span class="dot">·</span><span>Cruz Loma</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="section-title">
-                                    <h2>Eventos gastronómicos</h2>
-                                    <a href="#" class="link-all">Ver más →</a>
-                                </div>
-                                <div class="row-grid cols-2">
-                                    <div class="card">
-                                        <div class="card-thumb ph-gastro"><button class="card-fav">♡</button></div>
-                                        <div class="card-body">
-                                            <h3>Festival del Chocolate</h3>
-                                            <div class="card-meta"><span>Julio · Centro</span></div>
-                                        </div>
-                                    </div>
-                                    <div class="card">
-                                        <div class="card-thumb ph-gastro"><button class="card-fav">♡</button></div>
-                                        <div class="card-body">
-                                            <h3>Quito Gastronómico</h3>
-                                            <div class="card-meta"><span>Octubre · Varios lugares</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section>
-                        <div class="row-grid" style="grid-template-columns:2.4fr 1fr;">
-                            <div>
-                                <div class="section-title">
-                                    <h2>Eventos en Quito</h2>
-                                    <a href="#" class="link-all">Ver más →</a>
-                                </div>
-                                <div class="row-grid cols-2">
-                                    <div class="card">
-                                        <div class="card-thumb ph-evento"><button class="card-fav">♡</button></div>
-                                        <div class="card-body">
-                                            <h3>Concierto de la Orquesta Sinfónica</h3>
-                                            <div class="card-meta"><span>18 Jul · Teatro Sucre</span></div>
-                                        </div>
-                                    </div>
-                                    <div class="card">
-                                        <div class="card-thumb ph-evento"><button class="card-fav">♡</button></div>
-                                        <div class="card-body">
-                                            <h3>Festival de la Luz</h3>
-                                            <div class="card-meta"><span>9 Ago · Centro Histórico</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="feature-banner">
-                                <h2>Vive la cultura quiteña</h2>
-                                <p>Explora nuestras tradiciones, historia y la calidez de nuestra gente.</p>
-                            </div>
-                        </div>
-                    </section>
                 </div>
             </main>
         </div>
     </div>
+    <script src="${pageContext.request.contextPath}/js/favoritos.js"></script>
+    <script src="${pageContext.request.contextPath}/js/panelUsuario.js"></script>
 </body>
 </html>

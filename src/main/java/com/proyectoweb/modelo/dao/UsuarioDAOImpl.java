@@ -3,16 +3,13 @@ package com.proyectoweb.modelo.dao;
 import java.util.List;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Persistence;
 import jakarta.persistence.TypedQuery;
 
 import com.proyectoweb.modelo.entities.Usuario;
 
 public class UsuarioDAOImpl implements UsuarioDAO {
 
-    private EntityManager em = Persistence
-            .createEntityManagerFactory("ProyectoWebPU")
-            .createEntityManager();
+    private EntityManager em = JPAUtil.crearEntityManager();
 
     @Override
     public boolean existeUsuario(String correo) {
@@ -73,6 +70,32 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             em.merge(usuario);
             em.getTransaction().commit();
             return true;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            return false;
+        }
+    }
+
+    @Override
+    public List<Usuario> listarTodos() {
+        // CU08: listado completo de cuentas para el administrador
+        return em.createQuery("SELECT u FROM Usuario u ORDER BY u.apellidos, u.nombres", Usuario.class)
+                .getResultList();
+    }
+
+    @Override
+    public boolean actualizarEstado(int id, boolean nuevoEstado) {
+        // CU08: habilita o inhabilita la cuenta
+        try {
+            em.getTransaction().begin();
+            Usuario usuario = em.find(Usuario.class, id);
+            if (usuario != null) {
+                usuario.setEstado(nuevoEstado);
+            }
+            em.getTransaction().commit();
+            return usuario != null;
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
