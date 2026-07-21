@@ -26,6 +26,7 @@
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({
                 elementoId: elementoId,
+                tipo: form.dataset.tipo,
                 calificacion: parseInt(marcada.value, 10),
                 resena: resena
             })

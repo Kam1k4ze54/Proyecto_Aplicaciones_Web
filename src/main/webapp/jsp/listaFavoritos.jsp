@@ -53,7 +53,7 @@
                     <div class="row-grid cols-3" id="gridFavoritos">
                         <c:forEach var="e" items="${favoritos}">
                             <div class="card" id="fav-${e.id}">
-                                <a class="card-link" href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=detalle&id=${e.id}">
+                                <a class="card-link" href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=detalle&id=${e.id}&tipo=${e.tipo}">
                                     <div class="card-thumb ${e.tipo == 'LugarTuristico' ? 'ph-lugar' : 'ph-gastro'}">
                                         <c:if test="${e.destacado}"><span class="tag">Destacado</span></c:if>
                                     </div>

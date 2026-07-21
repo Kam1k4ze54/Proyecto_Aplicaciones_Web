@@ -72,13 +72,14 @@ public class DescubrirContenidoController extends HttpServlet {
         req.getRequestDispatcher("/jsp/panelUsuario.jsp").forward(req, resp);
     }
 
-    // CU04-A pasos 3-4: ficha de detalle del elemento seleccionado
+    // CU04-A pasos 3-4: GET /descubrir/detalle?id={id}&tipo={tipo}
     private void detalle(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         Usuario usuario = (Usuario) req.getSession().getAttribute("usuario");
         int id = Integer.parseInt(req.getParameter("id"));
+        String tipo = req.getParameter("tipo");
 
-        ElementoContenido elemento = contenidoServicio.buscarPorId(id);
+        ElementoContenido elemento = contenidoServicio.buscarPorId(id, tipo);
         if (elemento == null) {
             resp.sendRedirect(req.getContextPath() + "/DescubrirContenidoController?ruta=inicio");
             return;

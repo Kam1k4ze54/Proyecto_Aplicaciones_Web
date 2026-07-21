@@ -27,7 +27,7 @@
             fav = '<button class="card-fav" data-id="' + e.id + '" data-tipo="' + e.tipo + '" title="Agregar a favoritos">♡</button>';
         }
         return '<div class="card">' +
-            '<a class="card-link" href="' + BASE + '/DescubrirContenidoController?ruta=detalle&id=' + e.id + '">' +
+            '<a class="card-link" href="' + BASE + '/DescubrirContenidoController?ruta=detalle&id=' + e.id + '&tipo=' + e.tipo + '">' +
             '<div class="card-thumb ' + (CLASES_THUMB[e.tipo] || '') + '">' +
             (e.destacado ? '<span class="tag">Destacado</span>' : '') + '</div>' +
             '<div class="card-body"><h3>' + e.nombre + '</h3>' +

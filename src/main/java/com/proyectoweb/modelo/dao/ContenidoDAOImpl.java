@@ -1,7 +1,9 @@
 package com.proyectoweb.modelo.dao;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -13,6 +15,8 @@ import com.proyectoweb.modelo.entities.Evento;
 import com.proyectoweb.modelo.entities.LugarTuristico;
 
 public class ContenidoDAOImpl implements ContenidoDAO {
+
+    private static final String[] TIPOS = { "LugarTuristico", "EstablecimientoGastronomico", "Evento" };
 
     private EntityManager em = JPAUtil.crearEntityManager();
 
@@ -31,18 +35,24 @@ public class ContenidoDAOImpl implements ContenidoDAO {
     }
 
     @Override
-    public List<ElementoContenido> obtenerPorCategoriasLimitado(List<Categoria> categorias, String tipo, int limite) {
-        if (categorias == null || categorias.isEmpty()) {
-            return new ArrayList<>();
+    public Map<String, List<ElementoContenido>> obtenerPorCategoriasLimitado(List<Categoria> categorias, int limite) {
+        // CU04-A: un mapa tipo -> primeros N elementos que coinciden con las preferencias
+        Map<String, List<ElementoContenido>> porPreferencia = new LinkedHashMap<>();
+        for (String tipo : TIPOS) {
+            if (categorias == null || categorias.isEmpty()) {
+                porPreferencia.put(tipo, new ArrayList<>());
+                continue;
+            }
+            TypedQuery<ElementoContenido> query = em.createQuery(
+                    "SELECT e FROM ElementoContenido e WHERE TYPE(e) = :clase AND e.activo = true "
+                            + "AND e.categoria IN :categorias ORDER BY e.destacado DESC, e.calificacionPromedio DESC",
+                    ElementoContenido.class);
+            query.setParameter("clase", claseDe(tipo));
+            query.setParameter("categorias", categorias);
+            query.setMaxResults(limite);
+            porPreferencia.put(tipo, query.getResultList());
         }
-        TypedQuery<ElementoContenido> query = em.createQuery(
-                "SELECT e FROM ElementoContenido e WHERE TYPE(e) = :clase AND e.activo = true "
-                        + "AND e.categoria IN :categorias ORDER BY e.destacado DESC, e.calificacionPromedio DESC",
-                ElementoContenido.class);
-        query.setParameter("clase", claseDe(tipo));
-        query.setParameter("categorias", categorias);
-        query.setMaxResults(limite);
-        return query.getResultList();
+        return porPreferencia;
     }
 
     @Override
@@ -67,18 +77,22 @@ public class ContenidoDAOImpl implements ContenidoDAO {
     }
 
     @Override
-    public List<ElementoContenido> listarTodosPorTipo(String tipo, boolean soloActivos) {
-        String jpql = "SELECT e FROM ElementoContenido e WHERE TYPE(e) = :clase"
-                + (soloActivos ? " AND e.activo = true" : "")
-                + " ORDER BY e.nombre";
-        TypedQuery<ElementoContenido> query = em.createQuery(jpql, ElementoContenido.class);
+    public List<ElementoContenido> listarTodosPorTipo(String tipo) {
+        TypedQuery<ElementoContenido> query = em.createQuery(
+                "SELECT e FROM ElementoContenido e WHERE TYPE(e) = :clase AND e.activo = true ORDER BY e.nombre",
+                ElementoContenido.class);
         query.setParameter("clase", claseDe(tipo));
         return query.getResultList();
     }
 
     @Override
-    public ElementoContenido buscarPorId(int id) {
-        return em.find(ElementoContenido.class, id);
+    public ElementoContenido buscarPorId(int id, String tipo) {
+        ElementoContenido elemento = em.find(ElementoContenido.class, id);
+        // El tipo de la URL debe corresponder a la subclase real del elemento
+        if (elemento != null && !claseDe(tipo).isInstance(elemento)) {
+            return null;
+        }
+        return elemento;
     }
 
     @Override
@@ -98,12 +112,14 @@ public class ContenidoDAOImpl implements ContenidoDAO {
     }
 
     @Override
-    public boolean eliminar(int id) {
+    public boolean eliminar(int id, String tipo) {
         try {
             em.getTransaction().begin();
             ElementoContenido elemento = em.find(ElementoContenido.class, id);
-            if (elemento != null) {
+            if (elemento != null && claseDe(tipo).isInstance(elemento)) {
                 em.remove(elemento);
+            } else {
+                elemento = null;
             }
             em.getTransaction().commit();
             return elemento != null;

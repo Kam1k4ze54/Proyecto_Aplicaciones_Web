@@ -6,7 +6,6 @@ import com.proyectoweb.modelo.dao.ContenidoDAO;
 import com.proyectoweb.modelo.dao.ContenidoDAOImpl;
 import com.proyectoweb.modelo.dao.EvaluacionDAO;
 import com.proyectoweb.modelo.dao.EvaluacionDAOImpl;
-import com.proyectoweb.modelo.entities.ElementoContenido;
 import com.proyectoweb.modelo.entities.Evaluacion;
 import com.proyectoweb.modelo.entities.Usuario;
 
@@ -25,24 +24,30 @@ public class EvaluacionServicio {
     }
 
     /**
-     * CU05-B: registra o actualiza la evaluación y recalcula el promedio.
-     * Devuelve el nuevo promedio del elemento.
+     * CU05-B: registra o actualiza la evaluación, recalcula el promedio
+     * y lo persiste en el elemento. Devuelve la evaluación registrada
+     * (su elemento queda con el nuevo promedio).
      */
-    public double registrarOActualizar(Usuario usuario, int elementoId, int calificacion, String resena) {
-        Evaluacion previa = evaluacionDAO.buscarPorUsuarioYElemento(usuario.getId(), elementoId);
+    public Evaluacion registrarOActualizar(Evaluacion e) {
+        int elementoId = e.getElemento().getId();
+        Evaluacion previa = evaluacionDAO.buscarPorUsuarioYElemento(e.getUsuario().getId(), elementoId);
+
+        Evaluacion resultado;
         if (previa == null) {
-            ElementoContenido elemento = contenidoDAO.buscarPorId(elementoId);
-            evaluacionDAO.guardar(new Evaluacion(usuario, elemento, calificacion, resena));
+            resultado = evaluacionDAO.guardar(e);
         } else {
-            previa.setCalificacion(calificacion);
-            previa.setResena(resena);
-            evaluacionDAO.actualizar(previa);
+            previa.setCalificacion(e.getCalificacion());
+            previa.setResena(e.getResena());
+            resultado = evaluacionDAO.actualizar(previa);
         }
+
         double nuevoPromedio = calcularCalificacionPromedio(elementoId);
         contenidoDAO.actualizarCalificacionPromedio(elementoId, nuevoPromedio);
-        return nuevoPromedio;
+        resultado.getElemento().setCalificacionPromedio(nuevoPromedio);
+        return resultado;
     }
 
+    // CU05-B: promedio a partir de todas las calificaciones del elemento
     private double calcularCalificacionPromedio(int elementoId) {
         List<Integer> calificaciones = evaluacionDAO.obtenerCalificacionesPorElemento(elementoId);
         if (calificaciones.isEmpty()) {

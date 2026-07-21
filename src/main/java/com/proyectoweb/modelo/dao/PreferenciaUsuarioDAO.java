@@ -10,5 +10,7 @@ public interface PreferenciaUsuarioDAO {
 
     List<Categoria> obtenerPreferencias(Usuario usuario); // CU03 (preferencias actuales del usuario)
 
+    List<Categoria> obtenerCategoriasPreferidas(Usuario usuario); // CU04-A (recomendaciones del panel)
+
     boolean actualizarPreferencias(Usuario usuario, List<Integer> seleccion); // CU03 (reemplaza las preferencias)
 }

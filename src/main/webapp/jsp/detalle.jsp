@@ -86,7 +86,7 @@
 
                             <%-- Desde la ficha se continúa a CU05 (evaluar) o CU06 (favoritos) --%>
                             <div class="detalle-acciones">
-                                <a class="btn btn-primary" href="${pageContext.request.contextPath}/EvaluarContenidoController?elementoId=${elemento.id}">★ Evaluar</a>
+                                <a class="btn btn-primary" href="${pageContext.request.contextPath}/EvaluarContenidoController?elementoId=${elemento.id}&tipo=${elemento.tipo}">★ Evaluar</a>
                                 <c:if test="${esFavoriteable}">
                                     <button id="btnFavorito" class="btn btn-ghost ${estaEnFavoritos ? 'favorito-activo' : ''}"
                                             onclick="agregarFavorito(${elemento.id}, '${elemento.tipo}', this)">
