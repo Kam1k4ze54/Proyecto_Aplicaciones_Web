@@ -44,6 +44,12 @@ public class PreferenciaUsuarioDAOImpl implements PreferenciaUsuarioDAO {
     }
 
     @Override
+    public List<Categoria> obtenerCategoriasPreferidas(Usuario usuario) {
+        // CU04-A: mismas categorías del usuario, nombre según el diagrama de CU04
+        return obtenerPreferencias(usuario);
+    }
+
+    @Override
     public boolean actualizarPreferencias(Usuario usuario, List<Integer> seleccion) {
         // CU03: reemplaza las preferencias del usuario por la nueva selección
         try {

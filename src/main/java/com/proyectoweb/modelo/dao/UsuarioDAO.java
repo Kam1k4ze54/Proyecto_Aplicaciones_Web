@@ -11,8 +11,6 @@ public interface UsuarioDAO {
 
     Usuario autenticar(String correo, String contrasena); // CU02 (verifica credenciales)
 
-    String obtenerRol(Usuario usuario); // CU02 (rol para enrutar el panel)
-
     Usuario buscarPorId(int id); // CU03 (carga el perfil del usuario)
 
     boolean existeCorreo(String correo, int id); // CU03 (correo duplicado, excluyendo al propio usuario)

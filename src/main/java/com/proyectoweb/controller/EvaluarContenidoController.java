@@ -32,8 +32,10 @@ public class EvaluarContenidoController extends HttpServlet {
             return;
         }
 
+        // CU05-A: GET /evaluar?elementoId={id}&tipo={tipo}
         int elementoId = Integer.parseInt(req.getParameter("elementoId"));
-        ElementoContenido elemento = contenidoServicio.buscarPorId(elementoId);
+        String tipo = req.getParameter("tipo");
+        ElementoContenido elemento = contenidoServicio.buscarPorId(elementoId, tipo);
         if (elemento == null) {
             resp.sendRedirect(req.getContextPath() + "/DescubrirContenidoController?ruta=inicio");
             return;

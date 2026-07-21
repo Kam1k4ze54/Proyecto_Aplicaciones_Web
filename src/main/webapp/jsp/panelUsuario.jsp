@@ -96,7 +96,7 @@
                                         <div class="row-grid cols-3" id="grid-${seccion.key}">
                                             <c:forEach var="e" items="${seccion.value.elementos}">
                                                 <div class="card">
-                                                    <a class="card-link" href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=detalle&id=${e.id}">
+                                                    <a class="card-link" href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=detalle&id=${e.id}&tipo=${e.tipo}">
                                                         <div class="card-thumb ${e.tipo == 'LugarTuristico' ? 'ph-lugar' : e.tipo == 'EstablecimientoGastronomico' ? 'ph-gastro' : 'ph-evento'}">
                                                             <c:if test="${e.destacado}"><span class="tag">Destacado</span></c:if>
                                                         </div>

@@ -39,11 +39,11 @@
 
             <main class="content">
                 <div class="container" style="padding:0;max-width:none;">
-                    <p><a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=detalle&id=${elemento.id}">← Volver al detalle</a></p>
+                    <p><a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=detalle&id=${elemento.id}&tipo=${elemento.tipo}">← Volver al detalle</a></p>
 
                     <%-- CU05 paso 2: formulario de calificación y reseña.
                          Alterno "Evaluación previa": llega precargado y editable. --%>
-                    <form class="panel" style="max-width:640px;" id="formEvaluacion" data-elemento-id="${elemento.id}">
+                    <form class="panel" style="max-width:640px;" id="formEvaluacion" data-elemento-id="${elemento.id}" data-tipo="${elemento.tipo}">
                         <h2>
                             <c:choose>
                                 <c:when test="${not empty evaluacion}">Editar mi evaluación de «${elemento.nombre}»</c:when>
@@ -77,7 +77,7 @@
                                     <c:otherwise>Publicar</c:otherwise>
                                 </c:choose>
                             </button>
-                            <a class="btn btn-ghost" href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=detalle&id=${elemento.id}">Cancelar</a>
+                            <a class="btn btn-ghost" href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=detalle&id=${elemento.id}&tipo=${elemento.tipo}">Cancelar</a>
                         </div>
                     </form>
                 </div>

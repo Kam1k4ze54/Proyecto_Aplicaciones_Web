@@ -37,14 +37,15 @@ public class ContenidoServicio {
      * (alterno 7); si tampoco hay, la sección queda marcada como vacía.
      */
     public Map<String, VistaSeccion> obtenerVistaPrevia(Usuario usuario, int limite) {
-        List<Categoria> preferidas = preferenciaUsuarioDAO.obtenerPreferencias(usuario);
-        Map<String, VistaSeccion> vistaPrevia = new LinkedHashMap<>();
+        List<Categoria> preferidas = preferenciaUsuarioDAO.obtenerCategoriasPreferidas(usuario);
+        Map<String, List<ElementoContenido>> porPreferencia =
+                contenidoDAO.obtenerPorCategoriasLimitado(preferidas, limite);
 
+        Map<String, VistaSeccion> vistaPrevia = new LinkedHashMap<>();
         for (String tipo : TIPOS) {
-            List<ElementoContenido> porPreferencia =
-                    contenidoDAO.obtenerPorCategoriasLimitado(preferidas, tipo, limite);
-            if (!porPreferencia.isEmpty()) {
-                vistaPrevia.put(tipo, new VistaSeccion(porPreferencia, VistaSeccion.ORIGEN_PREFERENCIAS));
+            List<ElementoContenido> recomendados = porPreferencia.get(tipo);
+            if (recomendados != null && !recomendados.isEmpty()) {
+                vistaPrevia.put(tipo, new VistaSeccion(recomendados, VistaSeccion.ORIGEN_PREFERENCIAS));
                 continue;
             }
             List<ElementoContenido> destacados = contenidoDAO.obtenerDestacadosPorTipo(tipo, limite);
@@ -57,33 +58,28 @@ public class ContenidoServicio {
         return vistaPrevia;
     }
 
-    // CU04: ficha de detalle
-    public ElementoContenido buscarPorId(int id) {
-        return contenidoDAO.buscarPorId(id);
+    // CU04-A / CU07-C: ficha o formulario del elemento
+    public ElementoContenido buscarPorId(int id, String tipo) {
+        return contenidoDAO.buscarPorId(id, tipo);
     }
 
-    // CU04 alterno 5: búsqueda por nombre en los tres tipos
+    // CU04-B: búsqueda por nombre en los tres tipos
     public List<ElementoContenido> buscarPorNombre(String termino) {
         return contenidoDAO.buscarPorNombre(termino);
     }
 
-    // CU04 alterno 6: lista completa de un tipo (solo activos, vista de usuario)
+    // CU04-C / CU07-A: lista completa de un tipo
     public List<ElementoContenido> listarTodosPorTipo(String tipo) {
-        return contenidoDAO.listarTodosPorTipo(tipo, true);
+        return contenidoDAO.listarTodosPorTipo(tipo);
     }
 
-    // CU07-A: listado administrativo (incluye inactivos)
-    public List<ElementoContenido> listarTodosPorTipoAdmin(String tipo) {
-        return contenidoDAO.listarTodosPorTipo(tipo, false);
-    }
-
-    // CU07-B paso 4-5: valida y registra
+    // CU07-B pasos 4-5: valida y registra
     public ElementoContenido crear(ElementoContenido elemento) {
         validar(elemento);
         return contenidoDAO.guardar(elemento);
     }
 
-    // CU07-C paso 4-5: valida y actualiza
+    // CU07-C pasos 4-5: valida y actualiza
     public ElementoContenido actualizar(ElementoContenido elemento) {
         validar(elemento);
         return contenidoDAO.actualizar(elemento);
@@ -124,16 +120,17 @@ public class ContenidoServicio {
                 favoritoDAO.contarPorElemento(id));
     }
 
-    // CU07-D 3.A: elimina el elemento junto con sus dependencias
-    public boolean eliminar(int id) {
+    // CU07-D 3.A: elimina el elemento; sus dependencias se limpian primero
+    // (CU07 3.A: "elimina el elemento del catálogo y sus dependencias")
+    public boolean eliminar(int id, String tipo) {
         evaluacionDAO.eliminarPorElemento(id);
         favoritoDAO.eliminarPorElemento(id);
-        return contenidoDAO.eliminar(id);
+        return contenidoDAO.eliminar(id, tipo);
     }
 
     // CU07-E: marca/desmarca como destacado (toggle)
-    public boolean toggleDestacado(int id) {
-        ElementoContenido elemento = contenidoDAO.buscarPorId(id);
+    public boolean toggleDestacado(int id, String tipo) {
+        ElementoContenido elemento = contenidoDAO.buscarPorId(id, tipo);
         if (elemento == null) {
             return false;
         }

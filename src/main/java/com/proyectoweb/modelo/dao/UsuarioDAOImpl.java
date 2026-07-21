@@ -41,12 +41,6 @@ public class UsuarioDAOImpl implements UsuarioDAO {
     }
 
     @Override
-    public String obtenerRol(Usuario usuario) {
-        // CU02: obtiene el rol del usuario autenticado
-        return usuario.getRol();
-    }
-
-    @Override
     public Usuario buscarPorId(int id) {
         // CU03: carga el perfil del usuario
         return em.find(Usuario.class, id);

@@ -96,7 +96,7 @@ public class GestionarContenidoController extends HttpServlet {
         String tipo = tipoDe(req);
         req.setAttribute("usuario", req.getSession().getAttribute("usuario"));
         req.setAttribute("tipo", tipo);
-        req.setAttribute("elementos", contenidoServicio.listarTodosPorTipoAdmin(tipo));
+        req.setAttribute("elementos", contenidoServicio.listarTodosPorTipo(tipo));
         if (req.getParameter("mensajeExito") != null) {
             req.setAttribute("mensajeExito", req.getParameter("mensajeExito"));
         }
@@ -144,7 +144,7 @@ public class GestionarContenidoController extends HttpServlet {
         int id = Integer.parseInt(req.getParameter("id"));
         req.setAttribute("usuario", req.getSession().getAttribute("usuario"));
         req.setAttribute("tipo", tipo);
-        req.setAttribute("elemento", contenidoServicio.buscarPorId(id));
+        req.setAttribute("elemento", contenidoServicio.buscarPorId(id, tipo));
         req.setAttribute("categorias", categoriaServicio.obtenerCategoriasPorTipo(tipo));
         req.getRequestDispatcher("/jsp/formularioContenido.jsp").forward(req, resp);
     }
@@ -154,7 +154,7 @@ public class GestionarContenidoController extends HttpServlet {
             throws ServletException, IOException {
         String tipo = tipoDe(req);
         int id = Integer.parseInt(req.getParameter("id"));
-        ElementoContenido elemento = construirDesdeFormulario(req, tipo, contenidoServicio.buscarPorId(id));
+        ElementoContenido elemento = construirDesdeFormulario(req, tipo, contenidoServicio.buscarPorId(id, tipo));
         try {
             contenidoServicio.actualizar(elemento);
         } catch (ValidacionException e) {
@@ -180,7 +180,7 @@ public class GestionarContenidoController extends HttpServlet {
 
         req.setAttribute("usuario", req.getSession().getAttribute("usuario"));
         req.setAttribute("tipo", tipo);
-        req.setAttribute("elemento", contenidoServicio.buscarPorId(id));
+        req.setAttribute("elemento", contenidoServicio.buscarPorId(id, tipo));
         req.setAttribute("dependencias", dependencias);
         req.getRequestDispatcher("/jsp/confirmarEliminacion.jsp").forward(req, resp);
     }
@@ -190,7 +190,7 @@ public class GestionarContenidoController extends HttpServlet {
             throws ServletException, IOException {
         String tipo = tipoDe(req);
         int id = Integer.parseInt(req.getParameter("id"));
-        contenidoServicio.eliminar(id);
+        contenidoServicio.eliminar(id, tipo);
         resp.sendRedirect(req.getContextPath() + "/GestionarContenidoController?ruta=listar&tipo=" + tipo
                 + "&mensajeExito=Elemento+eliminado+correctamente.");
     }
@@ -208,7 +208,7 @@ public class GestionarContenidoController extends HttpServlet {
             throws ServletException, IOException {
         String tipo = tipoDe(req);
         int id = Integer.parseInt(req.getParameter("id"));
-        contenidoServicio.toggleDestacado(id);
+        contenidoServicio.toggleDestacado(id, tipo);
         resp.sendRedirect(req.getContextPath() + "/GestionarContenidoController?ruta=listar&tipo=" + tipo);
     }
 
