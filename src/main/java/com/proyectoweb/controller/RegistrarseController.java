@@ -8,22 +8,23 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
-import com.proyectoweb.modelo.dao.CategoriaDAO;
-import com.proyectoweb.modelo.dao.CategoriaDAOImpl;
-import com.proyectoweb.modelo.dao.PreferenciaUsuarioDAO;
-import com.proyectoweb.modelo.dao.PreferenciaUsuarioDAOImpl;
-import com.proyectoweb.modelo.dao.UsuarioDAO;
-import com.proyectoweb.modelo.dao.UsuarioDAOImpl;
 import com.proyectoweb.modelo.entities.Categoria;
 import com.proyectoweb.modelo.entities.Usuario;
+import com.proyectoweb.modelo.servicios.CategoriaServicio;
+import com.proyectoweb.modelo.servicios.PreferenciaUsuarioServicio;
+import com.proyectoweb.modelo.servicios.UsuarioServicio;
+import com.proyectoweb.modelo.servicios.excepciones.CorreoDuplicadoException;
 
+/**
+ * CU01 — Registrarse (Servlet + JSP).
+ */
 @WebServlet("/RegistrarseController")
 public class RegistrarseController extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    private UsuarioDAO usuarioDAO = new UsuarioDAOImpl();
-    private CategoriaDAO categoriaDAO = new CategoriaDAOImpl();
-    private PreferenciaUsuarioDAO preferenciaUsuarioDAO = new PreferenciaUsuarioDAOImpl();
+    private UsuarioServicio usuarioServicio = new UsuarioServicio();
+    private CategoriaServicio categoriaServicio = new CategoriaServicio();
+    private PreferenciaUsuarioServicio preferenciaUsuarioServicio = new PreferenciaUsuarioServicio();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -53,13 +54,13 @@ public class RegistrarseController extends HttpServlet {
         }
     }
 
-    // CU pasos 1-2: presenta el formulario en blanco (el control no necesita datos)
+    // CU01 pasos 1-2: presenta el formulario de registro
     private void registrarse(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         req.getRequestDispatcher("/jsp/formularioRegistro.jsp").forward(req, resp);
     }
 
-    // CU pasos 3-7: valida, registra la cuenta, obtiene categorías y las presenta
+    // CU01 pasos 3-4: valida, registra la cuenta y presenta las categorías
     private void guardarRegistro(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String nombres = req.getParameter("nombres");
@@ -67,43 +68,37 @@ public class RegistrarseController extends HttpServlet {
         String correo = req.getParameter("correo");
         String contrasena = req.getParameter("contrasena");
 
-        // CU 4: validación (campos completos y correo no duplicado)
+        // Curso alterno: campos obligatorios vacíos
         if (nombres == null || nombres.isBlank() || apellidos == null || apellidos.isBlank()
                 || correo == null || correo.isBlank() || contrasena == null || contrasena.isBlank()) {
-            // CU 4.2: campos obligatorios vacíos
             req.setAttribute("mensajeError", "Debe completar todos los campos obligatorios.");
             req.getRequestDispatcher("/jsp/formularioRegistro.jsp").forward(req, resp);
             return;
         }
-        if (usuarioDAO.existeUsuario(correo)) {
-            // CU 4.1/4.2: correo ya registrado
-            req.setAttribute("mensajeError", "Ya existe un usuario con ese correo.");
+
+        Usuario usuario;
+        try {
+            usuario = usuarioServicio.registrarCuenta(new Usuario(nombres, apellidos, correo, contrasena));
+        } catch (CorreoDuplicadoException e) {
+            // Curso alterno: correo ya registrado
+            req.setAttribute("mensajeError", e.getMessage());
             req.getRequestDispatcher("/jsp/formularioRegistro.jsp").forward(req, resp);
             return;
         }
 
-        // CU 5: registra la cuenta y recibe el usuario creado (con su id)
-        Usuario usuario = usuarioDAO.guardarCuenta(new Usuario(nombres, apellidos, correo, contrasena));
-
-        // El usuario se conserva en sesión para asociarlo a las preferencias (CU paso
-        // 9)
+        // El usuario se conserva en sesión para asociarlo a las preferencias
         req.getSession().setAttribute("usuarioRegistrado", usuario);
 
-        // CU 6: obtiene el catálogo de categorías
-        List<Categoria> categorias = categoriaDAO.obtenerCategorias();
+        List<Categoria> categorias = categoriaServicio.obtenerCategorias();
         req.setAttribute("categorias", categorias);
-
-        // CU 7: presenta las categorías
         req.getRequestDispatcher("/jsp/seleccionPreferencias.jsp").forward(req, resp);
     }
 
-    // CU pasos 8-10: registra las preferencias seleccionadas y notifica
+    // CU01 pasos 5-6: registra las preferencias seleccionadas y notifica
     private void guardarPreferencias(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // Recupera el usuario creado en el paso anterior (fuente: sesión)
         Usuario usuario = (Usuario) req.getSession().getAttribute("usuarioRegistrado");
 
-        // CU 8: preferencias seleccionadas por el usuario
         String[] seleccionParam = req.getParameterValues("preferencias");
         List<Integer> seleccion = new ArrayList<>();
         if (seleccionParam != null) {
@@ -112,10 +107,16 @@ public class RegistrarseController extends HttpServlet {
             }
         }
 
-        // CU 9: registra las preferencias del usuario
-        preferenciaUsuarioDAO.guardarPreferencias(usuario, seleccion);
+        // Curso alterno: ninguna preferencia seleccionada
+        if (seleccion.isEmpty()) {
+            req.setAttribute("mensajeError", "Debe seleccionar al menos una preferencia.");
+            req.setAttribute("categorias", categoriaServicio.obtenerCategorias());
+            req.getRequestDispatcher("/jsp/seleccionPreferencias.jsp").forward(req, resp);
+            return;
+        }
 
-        // CU 10: notifica el registro exitoso
+        preferenciaUsuarioServicio.guardarPreferencias(usuario, seleccion);
+
         req.getSession().removeAttribute("usuarioRegistrado");
         req.setAttribute("mensajeExito", "Registro exitoso. Ya puede iniciar sesión.");
         req.getRequestDispatcher("/jsp/inicioSesion.jsp").forward(req, resp);

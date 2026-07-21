@@ -3,7 +3,6 @@ package com.proyectoweb.modelo.dao;
 import java.util.List;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Persistence;
 import jakarta.persistence.TypedQuery;
 
 import com.proyectoweb.modelo.entities.Categoria;
@@ -12,9 +11,7 @@ import com.proyectoweb.modelo.entities.Usuario;
 
 public class PreferenciaUsuarioDAOImpl implements PreferenciaUsuarioDAO {
 
-    private EntityManager em = Persistence
-            .createEntityManagerFactory("ProyectoWebPU")
-            .createEntityManager();
+    private EntityManager em = JPAUtil.crearEntityManager();
 
     @Override
     public boolean guardarPreferencias(Usuario usuario, List<Integer> seleccion) {

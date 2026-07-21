@@ -9,6 +9,12 @@
     <class>com.proyectoweb.modelo.entities.Usuario</class>
     <class>com.proyectoweb.modelo.entities.Categoria</class>
     <class>com.proyectoweb.modelo.entities.PreferenciaUsuario</class>
+    <class>com.proyectoweb.modelo.entities.ElementoContenido</class>
+    <class>com.proyectoweb.modelo.entities.LugarTuristico</class>
+    <class>com.proyectoweb.modelo.entities.EstablecimientoGastronomico</class>
+    <class>com.proyectoweb.modelo.entities.Evento</class>
+    <class>com.proyectoweb.modelo.entities.Evaluacion</class>
+    <class>com.proyectoweb.modelo.entities.Favorito</class>
 
     <properties>
       <!-- Ajusta host, puerto, nombre de BD, usuario y contraseña -->
@@ -17,9 +23,11 @@
       <property name="jakarta.persistence.jdbc.password" value=""/>
       <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
 
-      <!-- Crea/actualiza las tablas automáticamente en desarrollo -->
-      <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
-      <property name="eclipselink.ddl-generation.output-mode" value="database"/>
+      <!-- Borra y crea las tablas en desarrollo; luego carga datos de prueba. -->
+      <property name="jakarta.persistence.schema-generation.database.action" value="drop-and-create"/>
+      <property name="jakarta.persistence.schema-generation.create-source" value="metadata"/>
+      <property name="jakarta.persistence.schema-generation.drop-source" value="metadata"/>
+      <property name="jakarta.persistence.sql-load-script-source" value="META-INF/sql/datos_prueba.sql"/>
 
       <property name="eclipselink.logging.level" value="FINE"/>
     </properties>

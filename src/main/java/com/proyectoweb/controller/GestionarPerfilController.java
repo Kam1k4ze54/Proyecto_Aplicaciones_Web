@@ -10,22 +10,23 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
-import com.proyectoweb.modelo.dao.CategoriaDAO;
-import com.proyectoweb.modelo.dao.CategoriaDAOImpl;
-import com.proyectoweb.modelo.dao.PreferenciaUsuarioDAO;
-import com.proyectoweb.modelo.dao.PreferenciaUsuarioDAOImpl;
-import com.proyectoweb.modelo.dao.UsuarioDAO;
-import com.proyectoweb.modelo.dao.UsuarioDAOImpl;
 import com.proyectoweb.modelo.entities.Categoria;
 import com.proyectoweb.modelo.entities.Usuario;
+import com.proyectoweb.modelo.servicios.CategoriaServicio;
+import com.proyectoweb.modelo.servicios.PreferenciaUsuarioServicio;
+import com.proyectoweb.modelo.servicios.UsuarioServicio;
+import com.proyectoweb.modelo.servicios.excepciones.CorreoDuplicadoException;
 
+/**
+ * CU03 — Gestionar Perfil (Servlet + JSP).
+ */
 @WebServlet("/GestionarPerfilController")
 public class GestionarPerfilController extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    private UsuarioDAO usuarioDAO = new UsuarioDAOImpl();
-    private CategoriaDAO categoriaDAO = new CategoriaDAOImpl();
-    private PreferenciaUsuarioDAO preferenciaUsuarioDAO = new PreferenciaUsuarioDAOImpl();
+    private UsuarioServicio usuarioServicio = new UsuarioServicio();
+    private CategoriaServicio categoriaServicio = new CategoriaServicio();
+    private PreferenciaUsuarioServicio preferenciaUsuarioServicio = new PreferenciaUsuarioServicio();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -41,6 +42,10 @@ public class GestionarPerfilController extends HttpServlet {
 
     private void ruteador(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        if (req.getSession().getAttribute("usuario") == null) {
+            resp.sendRedirect(req.getContextPath() + "/IniciarSesionController?ruta=iniciarSesion");
+            return;
+        }
         String ruta = (req.getParameter("ruta") != null) ? req.getParameter("ruta") : "gestionarPerfil";
         switch (ruta) {
             case "gestionarPerfil":
@@ -55,25 +60,25 @@ public class GestionarPerfilController extends HttpServlet {
         }
     }
 
-    // Precondición CU03: usuario con sesión activa en el panel principal
+    // CU03 pasos 1-2: presenta datos personales y preferencias actuales
     private void gestionarPerfil(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         Usuario sesion = (Usuario) req.getSession().getAttribute("usuario");
-        Usuario usuario = usuarioDAO.buscarPorId(sesion.getId());
-        List<Categoria> preferencias = preferenciaUsuarioDAO.obtenerPreferencias(usuario);
+        Usuario usuario = usuarioServicio.buscarPorId(sesion.getId());
+        List<Categoria> preferencias = preferenciaUsuarioServicio.obtenerPreferencias(usuario);
 
         req.setAttribute("usuario", usuario);
         req.setAttribute("preferencias", preferencias);
         req.getRequestDispatcher("/jsp/perfil.jsp").forward(req, resp);
     }
 
-    // Habilita la edición del perfil junto con el catálogo completo de categorías
+    // Habilita la edición con el catálogo completo de categorías
     private void editarPerfil(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         Usuario sesion = (Usuario) req.getSession().getAttribute("usuario");
-        Usuario usuario = usuarioDAO.buscarPorId(sesion.getId());
-        List<Categoria> preferencias = preferenciaUsuarioDAO.obtenerPreferencias(usuario);
-        List<Categoria> categorias = categoriaDAO.obtenerCategorias();
+        Usuario usuario = usuarioServicio.buscarPorId(sesion.getId());
+        List<Categoria> preferencias = preferenciaUsuarioServicio.obtenerPreferencias(usuario);
+        List<Categoria> categorias = categoriaServicio.obtenerCategorias();
 
         req.setAttribute("usuario", usuario);
         req.setAttribute("preferencias", preferencias);
@@ -83,7 +88,7 @@ public class GestionarPerfilController extends HttpServlet {
         req.getRequestDispatcher("/jsp/perfil.jsp").forward(req, resp);
     }
 
-    // Ids de las categorías preferidas, para que la vista marque los checkbox correspondientes
+    // Ids de las categorías preferidas, para marcar los checkbox de la vista
     private Set<Integer> idsDe(List<Categoria> categorias) {
         Set<Integer> ids = new HashSet<>();
         for (Categoria categoria : categorias) {
@@ -92,34 +97,35 @@ public class GestionarPerfilController extends HttpServlet {
         return ids;
     }
 
-    // Valida el correo, actualiza los datos del perfil y sus preferencias
+    // CU03 pasos 3-6: valida y guarda los cambios de datos y preferencias
     private void guardarPerfil(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         Usuario sesion = (Usuario) req.getSession().getAttribute("usuario");
-        Usuario usuario = usuarioDAO.buscarPorId(sesion.getId());
+        Usuario usuario = usuarioServicio.buscarPorId(sesion.getId());
 
         String nombres = req.getParameter("nombres");
         String apellidos = req.getParameter("apellidos");
         String correo = req.getParameter("correo");
 
-        if (usuarioDAO.existeCorreo(correo, usuario.getId())) {
-            // Correo ya registrado por otro usuario
-            List<Categoria> preferencias = preferenciaUsuarioDAO.obtenerPreferencias(usuario);
-            List<Categoria> categorias = categoriaDAO.obtenerCategorias();
-            req.setAttribute("usuario", usuario);
-            req.setAttribute("preferencias", preferencias);
-            req.setAttribute("categorias", categorias);
-            req.setAttribute("preferenciaIds", this.idsDe(preferencias));
-            req.setAttribute("modoEdicion", true);
-            req.setAttribute("mensajeCorreoEnUso", "Ese correo ya está en uso por otra cuenta.");
-            req.getRequestDispatcher("/jsp/perfil.jsp").forward(req, resp);
-            return;
-        }
-
         usuario.setNombres(nombres);
         usuario.setApellidos(apellidos);
         usuario.setCorreo(correo);
-        usuarioDAO.actualizar(usuario);
+
+        try {
+            usuarioServicio.actualizarPerfil(usuario);
+        } catch (CorreoDuplicadoException e) {
+            // Curso alterno: correo ya en uso por otra cuenta
+            Usuario original = usuarioServicio.buscarPorId(sesion.getId());
+            List<Categoria> preferencias = preferenciaUsuarioServicio.obtenerPreferencias(original);
+            req.setAttribute("usuario", original);
+            req.setAttribute("preferencias", preferencias);
+            req.setAttribute("categorias", categoriaServicio.obtenerCategorias());
+            req.setAttribute("preferenciaIds", this.idsDe(preferencias));
+            req.setAttribute("modoEdicion", true);
+            req.setAttribute("mensajeCorreoEnUso", e.getMessage());
+            req.getRequestDispatcher("/jsp/perfil.jsp").forward(req, resp);
+            return;
+        }
 
         String[] seleccionParam = req.getParameterValues("preferencias");
         List<Integer> seleccion = new ArrayList<>();
@@ -128,10 +134,10 @@ public class GestionarPerfilController extends HttpServlet {
                 seleccion.add(Integer.parseInt(id));
             }
         }
-        preferenciaUsuarioDAO.actualizarPreferencias(usuario, seleccion);
+        preferenciaUsuarioServicio.actualizarPreferencias(usuario, seleccion);
 
         req.getSession().setAttribute("usuario", usuario);
-        req.setAttribute("mensajeExito", "Perfil actualizado correctamente.");
-        req.getRequestDispatcher("/jsp/panelUsuario.jsp").forward(req, resp);
+        resp.sendRedirect(req.getContextPath()
+                + "/DescubrirContenidoController?ruta=inicio&mensajeExito=Perfil+actualizado+correctamente.");
     }
 }
