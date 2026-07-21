@@ -1,4 +1,25 @@
 (function () {
+    /* ---------- Anuncios accesibles (aria-live) reutilizables ----------
+       window.anunciar(texto) crea (una sola vez) una región aria-live
+       visualmente oculta y actualiza su contenido. La usan panelUsuario.js
+       y favoritos.js para notificar a lectores de pantalla resultados de
+       búsqueda, nuevos elementos cargados y errores, sin recargar la página. */
+    window.anunciar = function (texto) {
+        var region = document.getElementById('anuncioAria');
+        if (!region) {
+            region = document.createElement('div');
+            region.id = 'anuncioAria';
+            region.className = 'sr-only';
+            region.setAttribute('aria-live', 'polite');
+            region.setAttribute('aria-atomic', 'true');
+            document.body.appendChild(region);
+        }
+        // Vaciar primero para que lectores de pantalla anuncien igual
+        // aunque el texto sea idéntico al anterior.
+        region.textContent = '';
+        window.setTimeout(function () { region.textContent = texto; }, 50);
+    };
+
     /* ---------- Dropdown de usuario: clic en vez de :hover ---------- */
     var trigger = document.getElementById('btnUserTrigger');
     var dropdown = document.getElementById('userDropdown');
@@ -43,7 +64,10 @@
 
     function aplicarTema(tema) {
         raiz.setAttribute('data-theme', tema);
-        if (btnTheme) btnTheme.textContent = tema === 'dark' ? '\u2600\uFE0F' : '\uD83C\uDF19';
+        if (btnTheme) {
+            btnTheme.textContent = tema === 'dark' ? '\u2600\uFE0F' : '\uD83C\uDF19';
+            btnTheme.setAttribute('aria-pressed', tema === 'dark' ? 'true' : 'false');
+        }
         try { localStorage.setItem('qd-tema', tema); } catch (e) {}
     }
 

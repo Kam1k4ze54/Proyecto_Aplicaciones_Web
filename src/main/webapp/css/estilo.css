@@ -122,8 +122,8 @@ button{font-family:inherit;}
 .auth-side::before{
   content:'';position:absolute;inset:0;
   background:
-    radial-gradient(circle at 15% 20%, oklch(0.7 0.1 82 / 0.14), transparent 45%),
-    radial-gradient(circle at 85% 80%, oklch(0.5 0.15 35 / 0.16), transparent 50%);
+          radial-gradient(circle at 15% 20%, oklch(0.7 0.1 82 / 0.14), transparent 45%),
+          radial-gradient(circle at 85% 80%, oklch(0.5 0.15 35 / 0.16), transparent 50%);
 }
 .auth-side-content{position:relative;z-index:1;}
 .auth-side .brand-name{font-size:22px;}
@@ -247,7 +247,7 @@ button{font-family:inherit;}
 .section-title .link-all{font-size:13px;font-weight:700;}
 section + section{margin-top:44px;}
 
-.row-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.row-grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));}
 .row-grid.cols-3{grid-template-columns:repeat(3,1fr);}
 .row-grid.cols-2{grid-template-columns:repeat(2,1fr);}
 
@@ -261,17 +261,24 @@ section + section{margin-top:44px;}
 .card-thumb.ph-gastro{background:linear-gradient(150deg, oklch(0.90 0.008 260), oklch(0.78 0.015 260));}
 .card-thumb.ph-evento{background:linear-gradient(150deg, oklch(0.30 0.02 260), oklch(0.15 0.015 260));}
 .card-img{width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:0;}
+/* .tag y .card-fav flotan sobre la miniatura con un fondo claro FIJO
+   (no depende del tema, porque debe verse bien sobre fotos claras y oscuras
+   por igual). Por eso su color de texto NO debe usar las variables --ink /
+   --ink-faint: esas variables se invierten en modo oscuro (se vuelven claras)
+   y quedarían casi invisibles sobre este mismo fondo casi blanco. Se usa un
+   tono oscuro fijo en su lugar. */
 .card-thumb .tag{
-  position:absolute;top:10px;left:10px;background:oklch(1 0 0 / 0.92);color:var(--ink);
+  position:absolute;top:10px;left:10px;background:oklch(1 0 0 / 0.92);color:oklch(0.25 0.02 50);
   font-size:10px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;
   padding:4px 9px;border-radius:999px;
 }
 .card-fav{
   position:absolute;top:9px;right:9px;width:28px;height:28px;border-radius:50%;
   background:oklch(1 0 0 / 0.92);display:flex;align-items:center;justify-content:center;
-  color:var(--ink-faint);font-size:13px;border:none;cursor:pointer;
+  color:oklch(0.4 0.02 50);font-size:13px;border:none;cursor:pointer;
 }
 .card-fav:hover{color:var(--terracotta);}
+.card-fav.is-cargando{opacity:0.6;cursor:progress;}
 .card-body{padding:13px 15px;}
 .card-body h3{font-size:14.5px;margin-bottom:4px;}
 .card-meta{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--ink-soft);}
@@ -434,7 +441,6 @@ section + section{margin-top:44px;}
 
 /* ---------- Tablet (≤1024px) ---------- */
 @media (max-width: 1024px){
-  .row-grid,.row-grid.cols-3{grid-template-columns:repeat(2,1fr);}
   .detalle-layout,.profile-layout{grid-template-columns:1fr;}
   .auth-side{display:none;}
   .auth-shell{grid-template-columns:1fr;}
@@ -444,7 +450,7 @@ section + section{margin-top:44px;}
 
 /* ---------- Móvil (≤640px) ---------- */
 @media (max-width: 640px){
-  .row-grid,.row-grid.cols-3,.row-grid.cols-2{grid-template-columns:1fr;}
+  .row-grid{grid-template-columns:1fr;}
   .container{padding:0 20px;}
   .content{padding:20px;}
   .topbar{padding:12px 16px;gap:10px;}
@@ -469,4 +475,54 @@ section + section{margin-top:44px;}
   .data-row .v{text-align:left;}
   .form-actions{flex-direction:column;}
   .form-actions .btn{width:100%;}
+}
+
+/* ==========================================================================
+   Accesibilidad: texto solo para lectores de pantalla y foco visible
+   ========================================================================== */
+.sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+
+/* Anillo de foco consistente para navegación por teclado. No se muestra en
+   clic con mouse gracias a :focus-visible (soportado en todos los navegadores
+   modernos), evitando el "halo" en cada clic mientras se conserva para
+   quienes navegan con Tab. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+.card:focus-within{
+  outline:2px solid var(--terracotta);outline-offset:2px;border-radius:6px;
+}
+.card-link:focus-visible{outline-offset:-2px;}
+
+/* ==========================================================================
+   Estados de carga: skeletons y botones "cargando"
+   ========================================================================== */
+.skeleton-card{pointer-events:none;}
+.skeleton-line{height:11px;border-radius:6px;margin-bottom:8px;background:var(--surface-2);}
+.skeleton-shimmer{
+  background:linear-gradient(100deg, var(--surface-2) 30%, var(--border) 50%, var(--surface-2) 70%);
+  background-size:200% 100%;animation:qd-shimmer 1.3s ease-in-out infinite;
+}
+@keyframes qd-shimmer{
+  0%{background-position:200% 0;}
+  100%{background-position:-200% 0;}
+}
+
+.btn.is-cargando{opacity:0.75;cursor:progress;}
+
+/* ==========================================================================
+   Entrada/salida de tarjetas (ver más / eliminar de favoritos)
+   ========================================================================== */
+.card-nueva{opacity:0;transform:translateY(8px);transition:opacity .25s ease, transform .25s ease;}
+.card-nueva-visible{opacity:1;transform:translateY(0);}
+.card-saliendo{opacity:0;transform:scale(0.97);transition:opacity .15s ease, transform .15s ease;}
+
+/* Respeta la preferencia del usuario de reducir movimiento: desactiva
+   animaciones y transiciones no esenciales. */
+@media (prefers-reduced-motion: reduce){
+  .card,.card-nueva,.card-saliendo,.skeleton-shimmer,.sidebar{transition:none !important;animation:none !important;}
+  .card-nueva{opacity:1;transform:none;}
 }

@@ -10,82 +10,84 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilo.css?v=3">
 </head>
 <body>
-    <div class="app-shell">
-        <aside class="sidebar">
-            <div class="sidebar-overlay" id="sidebarOverlay"></div>
-            <div class="brand">
-                <div class="brand-mark">Q</div>
-                <div class="brand-name">Quito Descubre</div>
-            </div>
-            <nav class="sidebar-nav">
-                <a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=inicio"><span class="nav-icon">⌂</span>Inicio</a>
-                <a href="${pageContext.request.contextPath}/GestionarFavoritosController" class="active"><span class="nav-icon">♡</span>Favoritos</a>
-            </nav>
-        </aside>
-
-        <div class="main-area">
-            <header class="topbar">
-                <button class="menu-toggle" id="btnMenuToggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
-                <button class="theme-toggle" id="btnThemeToggle" aria-label="Cambiar tema">🌙</button>
-                <div class="user-menu">
-                    <button class="user-trigger" id="btnUserTrigger" aria-haspopup="true" aria-expanded="false">
-                        <div class="avatar-mini">${usuario.nombres.substring(0,1)}${usuario.apellidos.substring(0,1)}</div>
-                        <span class="hola">Hola, ${usuario.nombres}</span>
-                        <span class="chevron">⌄</span>
-                    </button>
-                    <div class="user-dropdown" id="userDropdown">
-                        <a href="${pageContext.request.contextPath}/GestionarPerfilController?ruta=gestionarPerfil">Mi perfil</a>
-                        <hr />
-                        <a href="${pageContext.request.contextPath}/IniciarSesionController?ruta=cerrarSesion">Cerrar sesión</a>
-                    </div>
-                </div>
-            </header>
-
-            <main class="content">
-                <div class="container" style="padding:0;max-width:none;">
-                    <div class="section-title"><h2>Mis favoritos</h2></div>
-                    <div id="avisoFavoritos" class="alert" style="display:none;"></div>
-
-                    <%-- CU06 alterno "Lista vacía" --%>
-                    <div id="favoritosVacio" style="${empty favoritos ? '' : 'display:none;'}">
-                        <div class="alert alert-error">Tu lista de favoritos está vacía.
-                            <a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=inicio">Explora el catálogo</a> y guarda lo que más te guste.</div>
-                    </div>
-
-                    <%-- CU06-B: lista de favoritos guardados --%>
-                    <div class="row-grid cols-3" id="gridFavoritos">
-                        <c:forEach var="e" items="${favoritos}">
-                            <div class="card" id="fav-${e.id}">
-                                <a class="card-link" href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=detalle&id=${e.id}&tipo=${e.tipo}">
-                                    <div class="card-thumb ${e.tipo == 'LugarTuristico' ? 'ph-lugar' : 'ph-gastro'}">
-                                        <c:if test="${not empty e.urlImagen}">
-                                            <img src="${e.urlImagen}" alt="${e.nombre}" class="card-img" loading="lazy" onerror="this.remove();" />
-                                        </c:if>
-                                        <c:if test="${e.destacado}"><span class="tag">Destacado</span></c:if>
-                                    </div>
-                                    <div class="card-body">
-                                        <h3>${e.nombre}</h3>
-                                        <div class="card-meta">
-                                            <span class="rating">★ <fmt:formatNumber value="${e.calificacionPromedio}" maxFractionDigits="1" minFractionDigits="1"/></span>
-                                            <span class="dot">·</span><span>${e.sector}</span>
-                                        </div>
-                                        <div class="form-actions" style="margin-top:10px;">
-                                            <%-- CU06-C: eliminar con confirmación (AJAX) --%>
-                                            <button class="btn btn-peligro btn-sm"
-                                                    onclick="event.preventDefault(); eliminarFavorito(${e.id}, document.getElementById('fav-${e.id}'));">
-                                                Eliminar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </c:forEach>
-                    </div>
-                </div>
-            </main>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <div class="brand">
+            <div class="brand-mark">Q</div>
+            <div class="brand-name">Quito Descubre</div>
         </div>
+        <nav class="sidebar-nav">
+            <a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=inicio"><span class="nav-icon">⌂</span>Inicio</a>
+            <a href="${pageContext.request.contextPath}/GestionarFavoritosController" class="active"><span class="nav-icon">♡</span>Favoritos</a>
+        </nav>
+    </aside>
+
+    <div class="main-area">
+        <header class="topbar">
+            <button class="menu-toggle" id="btnMenuToggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+            <button class="theme-toggle" id="btnThemeToggle" aria-label="Cambiar tema">🌙</button>
+            <div class="user-menu">
+                <button class="user-trigger" id="btnUserTrigger" aria-haspopup="true" aria-expanded="false">
+                    <div class="avatar-mini">${usuario.nombres.substring(0,1)}${usuario.apellidos.substring(0,1)}</div>
+                    <span class="hola">Hola, ${usuario.nombres}</span>
+                    <span class="chevron">⌄</span>
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="${pageContext.request.contextPath}/GestionarPerfilController?ruta=gestionarPerfil">Mi perfil</a>
+                    <hr />
+                    <a href="${pageContext.request.contextPath}/IniciarSesionController?ruta=cerrarSesion">Cerrar sesión</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="content">
+            <div class="container" style="padding:0;max-width:none;">
+                <div class="section-title"><h2>Mis favoritos</h2></div>
+                <div id="avisoFavoritos" class="alert" style="display:none;"></div>
+
+                <%-- CU06 alterno "Lista vacía" --%>
+                <div id="favoritosVacio" style="${empty favoritos ? '' : 'display:none;'}">
+                    <div class="alert alert-error">Tu lista de favoritos está vacía.
+                        <a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=inicio">Explora el catálogo</a> y guarda lo que más te guste.</div>
+                </div>
+
+                <%-- CU06-B: lista de favoritos guardados --%>
+                <div class="row-grid cols-3" id="gridFavoritos">
+                    <c:forEach var="e" items="${favoritos}">
+                        <div class="card" id="fav-${e.id}">
+                            <a class="card-link" href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=detalle&id=${e.id}&tipo=${e.tipo}">
+                                <div class="card-thumb ${e.tipo == 'LugarTuristico' ? 'ph-lugar' : 'ph-gastro'}">
+                                    <c:if test="${not empty e.urlImagen}">
+                                        <img src="${e.urlImagen}" alt="${e.nombre}" class="card-img" loading="lazy" onerror="this.remove();" />
+                                    </c:if>
+                                    <c:if test="${e.destacado}"><span class="tag">Destacado</span></c:if>
+                                </div>
+                                <div class="card-body">
+                                    <h3>${e.nombre}</h3>
+                                    <div class="card-meta">
+                                        <span class="rating">★ <fmt:formatNumber value="${e.calificacionPromedio}" maxFractionDigits="1" minFractionDigits="1"/></span>
+                                        <span class="dot">·</span><span>${e.sector}</span>
+                                    </div>
+                                </div>
+                            </a>
+                                <%-- CU06-C: eliminar con confirmación (AJAX). Fuera del <a> a propósito:
+                                     un botón anidado dentro de un enlace es HTML inválido y genera
+                                     comportamiento impredecible con teclado/lectores de pantalla. --%>
+                            <div class="form-actions" style="margin:0 15px 15px;">
+                                <button type="button" class="btn btn-peligro btn-sm btn-eliminar-favorito"
+                                        data-id="${e.id}" aria-label="Eliminar ${e.nombre} de favoritos">
+                                    Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </div>
+            </div>
+        </main>
     </div>
-    <script src="${pageContext.request.contextPath}/js/ui.js"></script>
-    <script src="${pageContext.request.contextPath}/js/favoritos.js"></script>
+</div>
+<script src="${pageContext.request.contextPath}/js/ui.js"></script>
+<script src="${pageContext.request.contextPath}/js/favoritos.js"></script>
 </body>
 </html>
