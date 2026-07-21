@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8"><title>Mi Perfil · Quito Descubre</title>
+    <meta charset="UTF-8"><script>(function(){try{document.documentElement.setAttribute('data-theme', localStorage.getItem('qd-tema')||'light');}catch(e){}})();</script><title>Mi Perfil · Quito Descubre</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Piazzolla:wght@500;600;700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilo.css?v=2">
@@ -11,6 +11,7 @@
 <body>
     <div class="app-shell">
         <aside class="sidebar">
+            <div class="sidebar-overlay" id="sidebarOverlay"></div>
             <div class="brand">
                 <div class="brand-mark">Q</div>
                 <div class="brand-name">Quito Descubre</div>
@@ -23,13 +24,15 @@
 
         <div class="main-area">
             <header class="topbar">
+                <button class="menu-toggle" id="btnMenuToggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+                <button class="theme-toggle" id="btnThemeToggle" aria-label="Cambiar tema">🌙</button>
                 <div class="user-menu">
-                    <button class="user-trigger">
+                    <button class="user-trigger" id="btnUserTrigger" aria-haspopup="true" aria-expanded="false">
                         <div class="avatar-mini">${usuario.nombres.substring(0,1)}${usuario.apellidos.substring(0,1)}</div>
                         <span class="hola">Hola, ${usuario.nombres}</span>
                         <span class="chevron">⌄</span>
                     </button>
-                    <div class="user-dropdown">
+                    <div class="user-dropdown" id="userDropdown">
                         <a href="${pageContext.request.contextPath}/GestionarPerfilController?ruta=gestionarPerfil">Mi perfil</a>
                         <a href="${pageContext.request.contextPath}/GestionarFavoritosController">Favoritos</a>
                         <hr />
@@ -83,6 +86,7 @@
                                 </div>
                                 <div class="form-actions">
                                     <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                                    <a class="btn btn-ghost" href="${pageContext.request.contextPath}/GestionarPerfilController?ruta=gestionarPerfil" id="btnCancelarEdicion">Cancelar</a>
                                 </div>
                             </form>
                         </c:when>
@@ -114,5 +118,64 @@
             </main>
         </div>
     </div>
+<c:if test="${modoEdicion}">
+<div class="modal-overlay" id="modalDescartar" style="display:none;">
+  <div class="modal-box">
+    <h3>Tienes cambios sin guardar</h3>
+    <p>Si sales ahora, perderás los cambios que hiciste en tu perfil.</p>
+    <div class="form-actions">
+      <button type="button" class="btn btn-ghost" id="btnSeguirEditando">Seguir editando</button>
+      <button type="button" class="btn btn-peligro" id="btnDescartarCambios">Descartar cambios</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+    var form = document.querySelector('form[action*="guardarPerfil"]');
+    if (!form) return;
+
+    var estadoInicial = new FormData(form);
+    var huboEnvio = false;
+    form.addEventListener('submit', function () { huboEnvio = true; });
+
+    function hayCambios() {
+        var actual = new FormData(form), a = [], b = [];
+        estadoInicial.forEach(function (v, k) { a.push(k + '=' + v); });
+        actual.forEach(function (v, k) { b.push(k + '=' + v); });
+        return a.sort().join('&') !== b.sort().join('&');
+    }
+
+    var modal = document.getElementById('modalDescartar');
+    var destinoPendiente = null;
+
+    function interceptar(ev) {
+        if (huboEnvio) return;
+        var link = ev.target.closest('a');
+        if (!link || !hayCambios()) return;
+        ev.preventDefault();
+        destinoPendiente = link.href;
+        modal.style.display = 'flex';
+    }
+
+    document.querySelector('.sidebar').addEventListener('click', interceptar, true);
+    document.querySelector('.user-dropdown').addEventListener('click', interceptar, true);
+    document.getElementById('btnCancelarEdicion').addEventListener('click', interceptar, true);
+
+    document.getElementById('btnSeguirEditando').addEventListener('click', function () {
+        modal.style.display = 'none';
+        destinoPendiente = null;
+    });
+    document.getElementById('btnDescartarCambios').addEventListener('click', function () {
+        if (destinoPendiente) window.location.href = destinoPendiente;
+    });
+
+    window.addEventListener('beforeunload', function (ev) {
+        if (!huboEnvio && hayCambios()) { ev.preventDefault(); ev.returnValue = ''; }
+    });
+})();
+</script>
+</c:if>
+    <script src="${pageContext.request.contextPath}/js/ui.js"></script>
 </body>
 </html>

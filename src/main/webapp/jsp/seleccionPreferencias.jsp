@@ -22,7 +22,7 @@
             <h1>Selecciona tus preferencias</h1>
             <p>Elige las categorías que más te interesan para personalizar tus recomendaciones.</p>
 
-            <form method="POST" action="${pageContext.request.contextPath}/RegistrarseController?ruta=guardarPreferencias">
+            <form method="POST" action="${pageContext.request.contextPath}/RegistrarseController?ruta=guardarPreferencias" id="formPreferencias">
                 <div class="pref-grid">
                     <c:forEach var="cat" items="${categorias}">
                         <label class="pref-chip">
@@ -36,5 +36,38 @@
             </form>
         </div>
     </main>
+<div class="modal-overlay" id="modalPreferencias" style="display:none;">
+  <div class="modal-box">
+    <h3>Selecciona al menos una preferencia</h3>
+    <p>Debes marcar al menos una categoría para continuar y personalizar tus recomendaciones.</p>
+    <div class="form-actions">
+      <button type="button" class="btn btn-primary" id="btnCerrarModalPref">Entendido</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var modal = document.getElementById('modalPreferencias');
+  var form = document.getElementById('formPreferencias');
+
+  function abrirModal() { modal.style.display = 'flex'; }
+  function cerrarModal() { modal.style.display = 'none'; }
+
+  document.getElementById('btnCerrarModalPref').addEventListener('click', cerrarModal);
+  modal.addEventListener('click', function (ev) { if (ev.target === modal) cerrarModal(); });
+
+  <c:if test="${not empty mensajeError}">
+  abrirModal();
+  </c:if>
+
+  form.addEventListener('submit', function (ev) {
+    if (form.querySelectorAll('input[name="preferencias"]:checked').length === 0) {
+      ev.preventDefault();
+      abrirModal();
+    }
+  });
+})();
+</script>
 </body>
 </html>

@@ -26,9 +26,12 @@
         if (e.tipo !== 'Evento') {
             fav = '<button class="card-fav" data-id="' + e.id + '" data-tipo="' + e.tipo + '" title="Agregar a favoritos">♡</button>';
         }
+        var imgHtml = e.urlImagen
+            ? '<img src="' + e.urlImagen + '" alt="' + e.nombre + '" class="card-img" loading="lazy" onerror="this.remove();" />'
+            : '';
         return '<div class="card">' +
             '<a class="card-link" href="' + BASE + '/DescubrirContenidoController?ruta=detalle&id=' + e.id + '&tipo=' + e.tipo + '">' +
-            '<div class="card-thumb ' + (CLASES_THUMB[e.tipo] || '') + '">' +
+            '<div class="card-thumb ' + (CLASES_THUMB[e.tipo] || '') + '">' + imgHtml +
             (e.destacado ? '<span class="tag">Destacado</span>' : '') + '</div>' +
             '<div class="card-body"><h3>' + e.nombre + '</h3>' +
             '<div class="card-meta">' + meta + '</div></div></a>' + fav + '</div>';
@@ -76,27 +79,77 @@
         contResultados.innerHTML = html + '</div>';
     }
 
-    /* ---------- CU04-C: ver más (expande la sección in-place) ---------- */
-    document.querySelectorAll('.btn-ver-mas').forEach(function (btn) {
-        btn.addEventListener('click', function (ev) {
-            ev.preventDefault();
-            var tipo = btn.dataset.tipo;
-            fetch(BASE + '/api/contenido/tipo/' + tipo, { headers: { 'Accept': 'application/json' } })
-                .then(function (r) { return r.json(); })
-                .then(function (lista) { expandirSeccion(tipo, lista, btn); });
-        });
-    });
+    /* ---------- CU04-C: ver más — revela una fila a la vez ---------- */
+    var cacheContenido = {};
+    var filasMostradas = {};
 
-    function expandirSeccion(tipo, listaCompleta, btn) {
+    function getIdsVisibles(grid) {
+        var ids = [];
+        grid.querySelectorAll('.card-link').forEach(function (link) {
+            var m = link.href.match(/id=(\d+)/);
+            if (m) ids.push(parseInt(m[1], 10));
+        });
+        return ids;
+    }
+
+    function elementosPorFila(grid) {
+        var cols = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+        return cols > 0 ? cols : 3;
+    }
+
+    function revelarSiguienteFila(tipo, btn) {
         var grid = document.getElementById('grid-' + tipo);
         if (!grid) return;
-        if (listaCompleta.length === 0) {
+        var lista = cacheContenido[tipo] || [];
+        var porFila = elementosPorFila(grid);
+
+        var idsVisibles = getIdsVisibles(grid);
+        var noMostrados = lista.filter(function (e) { return idsVisibles.indexOf(e.id) === -1; });
+
+        filasMostradas[tipo] = (filasMostradas[tipo] || 1) + 1;
+        var total = porFila * filasMostradas[tipo];
+        var siguientes = noMostrados.slice(0, total - idsVisibles.length);
+
+        if (siguientes.length === 0 && idsVisibles.length === 0) {
             grid.innerHTML = '<p>No hay contenido disponible en ' + NOMBRES_TIPO[tipo] + '.</p>';
-        } else {
-            var html = '';
-            listaCompleta.forEach(function (e) { html += tarjetaHtml(e); });
-            grid.innerHTML = html;
+            btn.style.display = 'none';
+            return;
         }
-        btn.style.display = 'none';
+
+        var html = '';
+        siguientes.forEach(function (e) { html += tarjetaHtml(e); });
+        grid.insertAdjacentHTML('beforeend', html);
+
+        var idsAhora = getIdsVisibles(grid);
+        if (idsAhora.length >= lista.length) {
+            btn.style.display = 'none';
+        }
     }
+
+    document.querySelectorAll('.btn-ver-mas').forEach(function (btn) {
+        var tipo = btn.dataset.tipo;
+
+        btn.addEventListener('click', function (ev) {
+            ev.preventDefault();
+            if (cacheContenido[tipo]) {
+                revelarSiguienteFila(tipo, btn);
+                return;
+            }
+            var textoOriginal = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Cargando…';
+            fetch(BASE + '/api/contenido/tipo/' + tipo, { headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (lista) {
+                    cacheContenido[tipo] = lista;
+                    btn.disabled = false;
+                    btn.textContent = textoOriginal;
+                    revelarSiguienteFila(tipo, btn);
+                })
+                .catch(function () {
+                    btn.disabled = false;
+                    btn.textContent = 'Error al cargar, reintentar';
+                });
+        });
+    });
 })();
