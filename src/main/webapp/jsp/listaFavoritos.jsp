@@ -17,7 +17,7 @@
                 <div class="brand-name">Quito Descubre</div>
             </div>
             <nav class="sidebar-nav">
-                <a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=inicio"><span class="nav-icon">⌂</span>Inicio</a>
+                <a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=descubrir"><span class="nav-icon">⌂</span>Inicio</a>
                 <a href="${pageContext.request.contextPath}/GestionarFavoritosController" class="active"><span class="nav-icon">♡</span>Favoritos</a>
             </nav>
         </aside>
@@ -46,7 +46,7 @@
                     <%-- CU06 alterno "Lista vacía" --%>
                     <div id="favoritosVacio" style="${empty favoritos ? '' : 'display:none;'}">
                         <div class="alert alert-error">Tu lista de favoritos está vacía.
-                            <a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=inicio">Explora el catálogo</a> y guarda lo que más te guste.</div>
+                            <a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=descubrir">Explora el catálogo</a> y guarda lo que más te guste.</div>
                     </div>
 
                     <%-- CU06-B: lista de favoritos guardados --%>

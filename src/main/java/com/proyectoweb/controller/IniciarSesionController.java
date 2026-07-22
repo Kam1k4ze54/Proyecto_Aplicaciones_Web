@@ -81,7 +81,7 @@ public class IniciarSesionController extends HttpServlet {
         if ("administrador".equals(usuario.getRol())) {
             resp.sendRedirect(req.getContextPath() + "/GestionarContenidoController?ruta=panel");
         } else {
-            resp.sendRedirect(req.getContextPath() + "/DescubrirContenidoController?ruta=inicio");
+            resp.sendRedirect(req.getContextPath() + "/DescubrirContenidoController?ruta=descubrir");
         }
     }
 

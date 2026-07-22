@@ -17,7 +17,7 @@
                 <div class="brand-name">Quito Descubre</div>
             </div>
             <nav class="sidebar-nav">
-                <a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=inicio" class="active"><span class="nav-icon">⌂</span>Inicio</a>
+                <a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=descubrir" class="active"><span class="nav-icon">⌂</span>Inicio</a>
                 <a href="#seccion-LugarTuristico"><span class="nav-icon">◆</span>Lugares turísticos</a>
                 <a href="#seccion-EstablecimientoGastronomico"><span class="nav-icon">◆</span>Gastronomía</a>
                 <a href="#seccion-Evento"><span class="nav-icon">◆</span>Eventos</a>
