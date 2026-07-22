@@ -62,6 +62,7 @@ public class RecursoContenido {
             dto.put("sector", e.getSector());
             dto.put("calificacionPromedio", e.getCalificacionPromedio());
             dto.put("destacado", e.isDestacado());
+            dto.put("urlImagen", e.getUrlImagen());
             dto.put("categoria", e.getCategoria() != null ? e.getCategoria().getNombre() : null);
             if (e instanceof LugarTuristico) {
                 dto.put("horario", ((LugarTuristico) e).getHorario());

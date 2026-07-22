@@ -100,6 +100,12 @@ public class ContenidoServicio {
         if (elemento.getCategoria() == null) {
             errores.add("Debe seleccionar una categoría.");
         }
+        if (elemento.getUrlImagen() != null && !elemento.getUrlImagen().isBlank()) {
+            String url = elemento.getUrlImagen().trim();
+            if (!url.matches("^https?://.+\\.(jpg|jpeg|png|webp)(\\?.*)?$")) {
+                errores.add("La URL de la imagen debe ser http(s) y apuntar a un archivo jpg, png o webp.");
+            }
+        }
         if (elemento instanceof Evento) {
             Evento evento = (Evento) elemento;
             if (evento.getFechaInicio() == null || evento.getFechaFin() == null) {

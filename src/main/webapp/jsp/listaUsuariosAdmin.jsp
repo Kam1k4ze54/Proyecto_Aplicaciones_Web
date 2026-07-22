@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8"><title>Gestión de Usuarios · Quito Descubre</title>
+    <meta charset="UTF-8"><script>(function(){try{document.documentElement.setAttribute('data-theme', localStorage.getItem('qd-tema')||'light');}catch(e){}})();</script><title>Gestión de Usuarios · Quito Descubre</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Piazzolla:wght@500;600;700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilo.css?v=3">
@@ -11,6 +11,7 @@
 <body>
     <div class="app-shell">
         <aside class="sidebar">
+            <div class="sidebar-overlay" id="sidebarOverlay"></div>
             <div class="brand">
                 <div class="brand-mark">Q</div>
                 <div class="brand-name">Quito Descubre</div>
@@ -26,13 +27,15 @@
 
         <div class="main-area">
             <header class="topbar">
+                <button class="menu-toggle" id="btnMenuToggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+                <button class="theme-toggle" id="btnThemeToggle" aria-label="Cambiar tema">🌙</button>
                 <div class="user-menu">
-                    <button class="user-trigger">
+                    <button class="user-trigger" id="btnUserTrigger" aria-haspopup="true" aria-expanded="false">
                         <div class="avatar-mini">${usuario.nombres.substring(0,1)}${usuario.apellidos.substring(0,1)}</div>
                         <span class="hola">Hola, ${usuario.nombres}</span>
                         <span class="chevron">⌄</span>
                     </button>
-                    <div class="user-dropdown">
+                    <div class="user-dropdown" id="userDropdown">
                         <a href="${pageContext.request.contextPath}/IniciarSesionController?ruta=cerrarSesion">Cerrar sesión</a>
                     </div>
                 </div>
@@ -102,5 +105,6 @@
             </main>
         </div>
     </div>
+    <script src="${pageContext.request.contextPath}/js/ui.js"></script>
 </body>
 </html>

@@ -52,6 +52,9 @@ public abstract class ElementoContenido implements Serializable {
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
 
+    @Column(name = "url_imagen", length = 500)
+    private String urlImagen;
+
     // Nombre simple de la subclase; se usa como discriminador en URLs y vistas
     public String getTipo() {
         return this.getClass().getSimpleName();
@@ -119,5 +122,13 @@ public abstract class ElementoContenido implements Serializable {
 
     public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
+    }
+
+    public String getUrlImagen() {
+        return urlImagen;
+    }
+
+    public void setUrlImagen(String urlImagen) {
+        this.urlImagen = urlImagen;
     }
 }

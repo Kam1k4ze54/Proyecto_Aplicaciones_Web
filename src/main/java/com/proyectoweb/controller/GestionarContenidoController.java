@@ -243,6 +243,8 @@ public class GestionarContenidoController extends HttpServlet {
         elemento.setDescripcion(req.getParameter("descripcion"));
         elemento.setSector(req.getParameter("sector"));
 
+        elemento.setUrlImagen(req.getParameter("urlImagen"));
+
         String categoriaId = req.getParameter("categoriaId");
         if (categoriaId != null && !categoriaId.isBlank()) {
             Categoria categoria = categoriaServicio.buscarPorId(Integer.parseInt(categoriaId));

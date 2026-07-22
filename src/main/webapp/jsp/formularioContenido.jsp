@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8"><title>${empty elemento or elemento.id == 0 ? 'Crear' : 'Editar'} contenido · Quito Descubre</title>
+    <meta charset="UTF-8"><script>(function(){try{document.documentElement.setAttribute('data-theme', localStorage.getItem('qd-tema')||'light');}catch(e){}})();</script><title>${empty elemento or elemento.id == 0 ? 'Crear' : 'Editar'} contenido · Quito Descubre</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Piazzolla:wght@500;600;700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilo.css?v=3">
@@ -11,6 +11,7 @@
 <body>
     <div class="app-shell">
         <aside class="sidebar">
+            <div class="sidebar-overlay" id="sidebarOverlay"></div>
             <div class="brand">
                 <div class="brand-mark">Q</div>
                 <div class="brand-name">Quito Descubre</div>
@@ -26,13 +27,15 @@
 
         <div class="main-area">
             <header class="topbar">
+                <button class="menu-toggle" id="btnMenuToggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+                <button class="theme-toggle" id="btnThemeToggle" aria-label="Cambiar tema">🌙</button>
                 <div class="user-menu">
-                    <button class="user-trigger">
+                    <button class="user-trigger" id="btnUserTrigger" aria-haspopup="true" aria-expanded="false">
                         <div class="avatar-mini">${usuario.nombres.substring(0,1)}${usuario.apellidos.substring(0,1)}</div>
                         <span class="hola">Hola, ${usuario.nombres}</span>
                         <span class="chevron">⌄</span>
                     </button>
-                    <div class="user-dropdown">
+                    <div class="user-dropdown" id="userDropdown">
                         <a href="${pageContext.request.contextPath}/IniciarSesionController?ruta=cerrarSesion">Cerrar sesión</a>
                     </div>
                 </div>
@@ -85,6 +88,16 @@
                             <input type="text" name="sector" id="sector" value="${elemento.sector}" />
                         </div>
                         <div class="form-field">
+                            <label for="urlImagen">URL de la imagen</label>
+                            <input type="url" name="urlImagen" id="urlImagen" value="${elemento.urlImagen}"
+                                   placeholder="https://ejemplo.com/imagen.jpg" />
+                            <c:if test="${not empty elemento.urlImagen}">
+                                <img src="${elemento.urlImagen}" alt="Vista previa"
+                                     style="max-width:160px;border-radius:8px;margin-top:8px;"
+                                     onerror="this.style.display='none';" />
+                            </c:if>
+                        </div>
+                        <div class="form-field">
                             <label for="categoriaId">Categoría</label>
                             <div class="pref-grid">
                                 <c:forEach var="cat" items="${categorias}">
@@ -135,5 +148,6 @@
             </main>
         </div>
     </div>
+    <script src="${pageContext.request.contextPath}/js/ui.js"></script>
 </body>
 </html>
