@@ -18,7 +18,7 @@
                 <div class="brand-name">Quito Descubre</div>
             </div>
             <nav class="sidebar-nav">
-                <a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=inicio"><span class="nav-icon">⌂</span>Inicio</a>
+                <a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=descubrir"><span class="nav-icon">⌂</span>Inicio</a>
                 <a href="${pageContext.request.contextPath}/GestionarFavoritosController"><span class="nav-icon">♡</span>Favoritos</a>
             </nav>
         </aside>
@@ -44,7 +44,7 @@
 
             <main class="content">
                 <div class="container" style="padding:0;max-width:none;">
-                    <p><a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=inicio">← Volver al panel</a></p>
+                    <p><a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=descubrir">← Volver al panel</a></p>
                     <div id="avisoFavoritos" class="alert" style="display:none;"></div>
 
                     <%-- CU04 paso 4: ficha de detalle completa --%>

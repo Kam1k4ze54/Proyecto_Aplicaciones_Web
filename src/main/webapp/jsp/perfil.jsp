@@ -17,7 +17,7 @@
                 <div class="brand-name">Quito Descubre</div>
             </div>
             <nav class="sidebar-nav">
-                <a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=inicio"><span class="nav-icon">⌂</span>Inicio</a>
+                <a href="${pageContext.request.contextPath}/DescubrirContenidoController?ruta=descubrir"><span class="nav-icon">⌂</span>Inicio</a>
                 <a href="${pageContext.request.contextPath}/GestionarFavoritosController"><span class="nav-icon">♡</span>Favoritos</a>
             </nav>
         </aside>

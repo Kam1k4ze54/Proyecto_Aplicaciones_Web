@@ -138,6 +138,6 @@ public class GestionarPerfilController extends HttpServlet {
 
         req.getSession().setAttribute("usuario", usuario);
         resp.sendRedirect(req.getContextPath()
-                + "/DescubrirContenidoController?ruta=inicio&mensajeExito=Perfil+actualizado+correctamente.");
+                + "/DescubrirContenidoController?ruta=descubrir&mensajeExito=Perfil+actualizado+correctamente.");
     }
 }

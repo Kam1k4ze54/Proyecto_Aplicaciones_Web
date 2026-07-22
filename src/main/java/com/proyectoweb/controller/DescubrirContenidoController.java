@@ -46,10 +46,10 @@ public class DescubrirContenidoController extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/IniciarSesionController?ruta=iniciarSesion");
             return;
         }
-        String ruta = (req.getParameter("ruta") != null) ? req.getParameter("ruta") : "inicio";
+        String ruta = (req.getParameter("ruta") != null) ? req.getParameter("ruta") : "descubrir";
         switch (ruta) {
-            case "inicio":
-                this.inicio(req, resp);
+            case "descubrir":
+                this.descubrir(req, resp);
                 break;
             case "detalle":
                 this.detalle(req, resp);
@@ -58,7 +58,7 @@ public class DescubrirContenidoController extends HttpServlet {
     }
 
     // CU04-A pasos 1-2: panel con 3 recomendaciones por sección (o destacados)
-    private void inicio(HttpServletRequest req, HttpServletResponse resp)
+    private void descubrir(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         Usuario usuario = (Usuario) req.getSession().getAttribute("usuario");
         Map<String, VistaSeccion> vistaPrevia =
@@ -81,7 +81,7 @@ public class DescubrirContenidoController extends HttpServlet {
 
         ElementoContenido elemento = contenidoServicio.buscarPorId(id, tipo);
         if (elemento == null) {
-            resp.sendRedirect(req.getContextPath() + "/DescubrirContenidoController?ruta=inicio");
+            resp.sendRedirect(req.getContextPath() + "/DescubrirContenidoController?ruta=descubrir");
             return;
         }
 
