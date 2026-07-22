@@ -48,6 +48,7 @@ public class DescubrirContenidoController extends HttpServlet {
         }
         String ruta = (req.getParameter("ruta") != null) ? req.getParameter("ruta") : "descubrir";
         switch (ruta) {
+            case "inicio":
             case "descubrir":
                 this.descubrir(req, resp);
                 break;
