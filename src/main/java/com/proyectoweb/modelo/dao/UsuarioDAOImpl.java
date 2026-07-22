@@ -31,7 +31,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 
     @Override
     public Usuario autenticar(String correo, String contrasena) {
-        // CU02: busca el usuario por correo y contraseña (null si no coinciden)
+        em.clear();
         TypedQuery<Usuario> query = em.createQuery(
                 "SELECT u FROM Usuario u WHERE u.correo = :correo AND u.contrasena = :contrasena", Usuario.class);
         query.setParameter("correo", correo);
