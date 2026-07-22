@@ -6,6 +6,7 @@
   <persistence-unit name="ProyectoWebPU" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 
+    <!-- Entidades del Modelo -->
     <class>com.proyectoweb.modelo.entities.Usuario</class>
     <class>com.proyectoweb.modelo.entities.Categoria</class>
     <class>com.proyectoweb.modelo.entities.PreferenciaUsuario</class>
@@ -17,18 +18,19 @@
     <class>com.proyectoweb.modelo.entities.Favorito</class>
 
     <properties>
-      <!-- Ajusta host, puerto, nombre de BD, usuario y contraseña -->
+      <!-- Configuración de Conexión a la Base de Datos -->
       <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/proyectoweb_db?useSSL=false&amp;serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=UTF-8"/>
       <property name="jakarta.persistence.jdbc.user" value="root"/>
       <property name="jakarta.persistence.jdbc.password" value=""/>
       <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
 
-      <!-- Borra y crea las tablas en desarrollo; luego carga datos de prueba. -->
+      <!-- Generación de Esquema y Datos de Prueba -->
       <property name="jakarta.persistence.schema-generation.database.action" value="drop-and-create"/>
       <property name="jakarta.persistence.schema-generation.create-source" value="metadata"/>
       <property name="jakarta.persistence.schema-generation.drop-source" value="metadata"/>
       <property name="jakarta.persistence.sql-load-script-source" value="META-INF/sql/datos_prueba.sql"/>
 
+      <!-- Nivel de Logs -->
       <property name="eclipselink.logging.level" value="FINE"/>
     </properties>
   </persistence-unit>
